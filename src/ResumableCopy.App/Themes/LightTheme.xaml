@@ -1,0 +1,78 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="CommonControls.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="AppSurfaceBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppForegroundBrush" Color="#212121" />
+    <SolidColorBrush x:Key="AppMutedForegroundBrush" Color="#666666" />
+    <SolidColorBrush x:Key="AppBorderBrush" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="AppAccentBrush" Color="#0078D4" />
+    <SolidColorBrush x:Key="AppOverlayBrush" Color="#66000000" />
+    <SolidColorBrush x:Key="AppSettingsPanelBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppButtonBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppButtonForegroundBrush" Color="#212121" />
+    <SolidColorBrush x:Key="AppButtonBorderBrush" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="AppButtonHoverBrush" Color="#E8E8E8" />
+    <SolidColorBrush x:Key="AppButtonHoverBorderBrush" Color="#AAAAAA" />
+    <SolidColorBrush x:Key="AppButtonPressedBrush" Color="#D6D6D6" />
+    <SolidColorBrush x:Key="AppTabBackgroundBrush" Color="#E8E8E8" />
+    <SolidColorBrush x:Key="AppTabSelectedBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AppTabHoverBackgroundBrush" Color="#F0F0F0" />
+    <SolidColorBrush x:Key="AppDataGridSelectionBrush" Color="#D6E9F8" />
+    <SolidColorBrush x:Key="AppDataGridCellFocusBrush" Color="#E8F4FC" />
+
+    <BitmapImage x:Key="AppLogoImage" UriSource="/Assets/logo.png" />
+
+    <Style TargetType="Window">
+        <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+    </Style>
+
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+        <Setter Property="RowBackground" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="AlternatingRowBackground" Value="#F8F8F8" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AppBorderBrush}" />
+        <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource AppBorderBrush}" />
+        <Setter Property="SelectionMode" Value="Single" />
+        <Setter Property="SelectionUnit" Value="FullRow" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="#EAEAEA" />
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+    </Style>
+
+    <Style TargetType="ListBox">
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+    </Style>
+
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+    </Style>
+
+    <Style TargetType="StatusBar">
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+    </Style>
+
+    <Style TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+    </Style>
+
+    <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+    </Style>
+</ResourceDictionary>

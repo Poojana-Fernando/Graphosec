@@ -1,0 +1,54 @@
+<UserControl x:Class="ResumableCopy.App.Views.TransferTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="0,8,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="180" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="0"
+                  ItemsSource="{Binding TransfersSource, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  SelectedItem="{Binding SelectedTransfer}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  MinHeight="160">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Source" Binding="{Binding SourcePath}" Width="2*" />
+                <DataGridTextColumn Header="Destination" Binding="{Binding DestinationPath}" Width="2*" />
+                <DataGridTextColumn Header="Status" Binding="{Binding StatusText}" Width="*" />
+                <DataGridTextColumn Header="Progress" Binding="{Binding ProgressPercent, StringFormat={}{0:0.0}%}" Width="80" />
+                <DataGridTextColumn Header="Speed" Binding="{Binding SpeedText}" Width="90" />
+                <DataGridTextColumn Header="ETA" Binding="{Binding EtaText}" Width="80" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,0">
+            <Button Content="Pause" Command="{Binding PauseSelectedTransferCommand}" MinWidth="88" Margin="0,0,8,0" />
+            <Button Content="Resume" Command="{Binding ResumeSelectedTransferCommand}" MinWidth="88" Margin="0,0,8,0" />
+            <Button Content="Cancel" Command="{Binding CancelSelectedTransferCommand}" MinWidth="88" Margin="0,0,8,0" />
+            <Button Content="Recover" Command="{Binding RecoverSessionsCommand}" MinWidth="88" Margin="0,0,8,0" />
+            <Button Content="Remove" Command="{Binding RemoveSelectedTransferCommand}" MinWidth="88" Margin="0,0,8,0" />
+            <Button Content="Clear history" Command="{Binding ClearHistoryCommand}" MinWidth="100" />
+        </StackPanel>
+
+        <GroupBox Grid.Row="2" Header="Selected transfer details" Padding="10" Margin="0,12,0,0">
+            <StackPanel>
+                <ProgressBar Height="18"
+                             Minimum="0"
+                             Maximum="100"
+                             Value="{Binding SelectedTransfer.ProgressPercent, TargetNullValue=0}" />
+                <TextBlock Margin="0,8,0,0"
+                           Text="{Binding SelectedTransfer.BytesCopiedText, TargetNullValue='No transfer selected.'}" />
+                <TextBlock Margin="0,4,0,0"
+                           Text="{Binding SelectedTransfer.UserMessage, TargetNullValue=''}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

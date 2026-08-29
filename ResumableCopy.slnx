@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ResumableCopy.App/ResumableCopy.App.csproj" />
+    <Project Path="src/ResumableCopy.Application/ResumableCopy.Application.csproj" />
+    <Project Path="src/ResumableCopy.Core/ResumableCopy.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ResumableCopy.Application.Tests/ResumableCopy.Application.Tests.csproj" />
+    <Project Path="tests/ResumableCopy.Core.Tests/ResumableCopy.Core.Tests.csproj" />
+  </Folder>
+</Solution>

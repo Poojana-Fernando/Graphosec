@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+
+
+  <PropertyGroup>
+
+    <OutputType>WinExe</OutputType>
+
+    <TargetFramework>net10.0-windows</TargetFramework>
+
+    <Nullable>enable</Nullable>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <UseWPF>true</UseWPF>
+
+    <AssemblyName>Graphosec</AssemblyName>
+
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+
+    <Product>Graphosec</Product>
+
+    <AssemblyTitle>Graphosec</AssemblyTitle>
+
+    <Company>Graphosec</Company>
+
+  </PropertyGroup>
+
+
+
+  <ItemGroup>
+
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
+
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
+
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+
+    <PackageReference Include="System.Management" Version="9.0.0" />
+
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\ResumableCopy.Application\ResumableCopy.Application.csproj" />
+
+    <ProjectReference Include="..\ResumableCopy.Core\ResumableCopy.Core.csproj" />
+
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+
+    <None Update="appsettings.json">
+
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+
+    </None>
+
+    <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\logo-white.png" />
+    <Resource Include="Assets\app.ico" />
+
+  </ItemGroup>
+
+
+
+</Project>
+

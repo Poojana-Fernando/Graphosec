@@ -1,0 +1,456 @@
+<Window x:Class="ResumableCopy.App.MainWindow"
+
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:ResumableCopy.App.Views"
+
+        mc:Ignorable="d"
+
+        Title="Graphosec"
+        Icon="/Assets/app.ico"
+
+        Height="780"
+
+        Width="1200"
+
+        MinHeight="640"
+
+        MinWidth="960"
+
+        Background="{DynamicResource AppBackgroundBrush}"
+
+        Foreground="{DynamicResource AppForegroundBrush}">
+
+    <Grid Margin="16">
+
+        <Grid.RowDefinitions>
+
+            <RowDefinition Height="Auto" />
+
+            <RowDefinition Height="Auto" />
+
+            <RowDefinition Height="*" />
+
+            <RowDefinition Height="Auto" />
+
+        </Grid.RowDefinitions>
+
+
+
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+
+            <Grid.ColumnDefinitions>
+
+                <ColumnDefinition Width="*" />
+
+                <ColumnDefinition Width="Auto" />
+
+            </Grid.ColumnDefinitions>
+
+
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                <Image Source="{DynamicResource AppLogoImage}"
+
+                       Width="44"
+
+                       Height="44"
+
+                       Margin="0,0,12,0"
+
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+
+                <TextBlock Text="Graphosec"
+
+                           FontSize="24"
+
+                           FontWeight="SemiBold"
+
+                           VerticalAlignment="Center" />
+
+            </StackPanel>
+
+
+
+            <Button Grid.Column="1"
+
+                    Content="Settings"
+
+                    Command="{Binding OpenSettingsCommand}"
+
+                    MinWidth="96"
+
+                    Padding="12,6"
+
+                    VerticalAlignment="Center" />
+
+        </Grid>
+
+
+
+        <GroupBox Grid.Row="1" Header="New transfer" Padding="12" Margin="0,0,0,12">
+
+            <Grid>
+
+                <Grid.ColumnDefinitions>
+
+                    <ColumnDefinition Width="Auto" />
+
+                    <ColumnDefinition Width="*" />
+
+                    <ColumnDefinition Width="Auto" />
+
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+
+                    <RowDefinition Height="Auto" />
+
+                    <RowDefinition Height="Auto" />
+
+                </Grid.RowDefinitions>
+
+
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Source" VerticalAlignment="Center" Margin="0,0,8,8" />
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,8,8">
+
+                    <TextBox Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Text="{Binding SourceInfoText}"
+
+                               Foreground="{DynamicResource AppMutedForegroundBrush}"
+
+                               FontSize="11"
+
+                               TextWrapping="Wrap"
+
+                               Margin="0,4,0,0" />
+
+                </StackPanel>
+
+                <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Command="{Binding BrowseSourceCommand}" Margin="0,0,0,8" MinWidth="90" />
+
+
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Destination" VerticalAlignment="Center" Margin="0,0,8,0" />
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
+
+                    <TextBox Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Text="{Binding DestinationInfoText}"
+
+                               Foreground="{DynamicResource AppMutedForegroundBrush}"
+
+                               FontSize="11"
+
+                               TextWrapping="Wrap"
+
+                               Margin="0,4,0,0" />
+
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
+
+                    <Button Content="Browse..." Command="{Binding BrowseDestinationCommand}" MinWidth="90" Margin="0,0,8,0" />
+
+                    <Button Content="Start" Command="{Binding StartTransferCommand}" MinWidth="90" />
+
+                </StackPanel>
+
+            </Grid>
+
+        </GroupBox>
+
+
+
+        <Grid Grid.Row="2" Margin="0,0,0,12">
+
+            <Grid.ColumnDefinitions>
+
+                <ColumnDefinition Width="280" MinWidth="220" />
+
+                <ColumnDefinition Width="12" />
+
+                <ColumnDefinition Width="*" MinWidth="400" />
+
+            </Grid.ColumnDefinitions>
+
+
+
+            <GroupBox Grid.Column="0" Header="Devices" Padding="10">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="*" />
+
+                    </Grid.RowDefinitions>
+
+
+
+                    <TextBlock Grid.Row="0"
+
+                               Text="USB and fixed drives. Click a ready drive to set destination."
+
+                               Foreground="{DynamicResource AppMutedForegroundBrush}"
+
+                               FontSize="11"
+
+                               TextWrapping="Wrap"
+
+                               Margin="0,0,0,8" />
+
+
+
+                    <Button Grid.Row="1"
+
+                            Content="Refresh drives"
+
+                            Command="{Binding RefreshDrivesCommand}"
+
+                            HorizontalAlignment="Stretch"
+
+                            Margin="0,0,0,8" />
+
+
+
+                    <ListBox Grid.Row="2"
+
+                             ItemsSource="{Binding Drives}"
+
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+
+                             BorderThickness="0"
+
+                             Background="Transparent">
+
+                        <ListBox.ItemContainerStyle>
+
+                            <Style TargetType="ListBoxItem">
+
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+
+                                <Setter Property="Padding" Value="0" />
+
+                                <Setter Property="Margin" Value="0,0,0,6" />
+
+                            </Style>
+
+                        </ListBox.ItemContainerStyle>
+
+                        <ListBox.ItemTemplate>
+
+                            <DataTemplate>
+
+                                <Button Command="{Binding DataContext.SelectDriveCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+
+                                        CommandParameter="{Binding}"
+
+                                        HorizontalContentAlignment="Stretch"
+
+                                        Padding="10,8">
+
+                                    <StackPanel>
+
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
+
+                                        <TextBlock Text="{Binding DriveType}" Foreground="{DynamicResource AppMutedForegroundBrush}" FontSize="11" Margin="0,2,0,0" />
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+
+                                            <TextBlock Text="{Binding StatusText}" FontSize="11" />
+
+                                            <TextBlock Text=" · " Foreground="{DynamicResource AppMutedForegroundBrush}" FontSize="11" />
+
+                                            <TextBlock Text="{Binding SpaceText}" Foreground="{DynamicResource AppMutedForegroundBrush}" FontSize="11" TextWrapping="Wrap" />
+
+                                        </StackPanel>
+
+                                    </StackPanel>
+
+                                </Button>
+
+                            </DataTemplate>
+
+                        </ListBox.ItemTemplate>
+
+                    </ListBox>
+
+                </Grid>
+
+            </GroupBox>
+
+
+
+            <GridSplitter Grid.Column="1"
+
+                          Width="4"
+
+                          HorizontalAlignment="Stretch"
+
+                          VerticalAlignment="Stretch"
+
+                          Background="Transparent"
+
+                          ShowsPreview="True" />
+
+
+
+            <TabControl Grid.Column="2">
+                <TabItem Header="Transfers">
+                    <views:TransferTabView TransfersSource="{Binding Transfers}" />
+                </TabItem>
+                <TabItem Header="Completed">
+                    <views:TransferTabView TransfersSource="{Binding CompletedTransfers}" />
+                </TabItem>
+                <TabItem Header="Paused">
+                    <views:TransferTabView TransfersSource="{Binding PausedTransfers}" />
+                </TabItem>
+                <TabItem Header="Cancelled">
+                    <views:TransferTabView TransfersSource="{Binding CancelledTransfers}" />
+                </TabItem>
+            </TabControl>
+
+        </Grid>
+
+
+
+        <StatusBar Grid.Row="3">
+
+            <StatusBarItem>
+
+                <TextBlock Text="{Binding StatusMessage}" />
+
+            </StatusBarItem>
+
+            <StatusBarItem HorizontalAlignment="Right">
+
+                <CheckBox Content="Overwrite existing destination files"
+
+                          IsChecked="{Binding OverwriteExisting}" />
+
+            </StatusBarItem>
+
+        </StatusBar>
+
+
+
+        <Grid Grid.RowSpan="4"
+
+              Background="{DynamicResource AppOverlayBrush}"
+
+              Visibility="{Binding IsSettingsOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+            <Border HorizontalAlignment="Right"
+
+                    VerticalAlignment="Stretch"
+
+                    Width="320"
+
+                    Background="{DynamicResource AppSettingsPanelBrush}"
+
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+
+                    BorderThickness="1,0,0,0"
+
+                    Padding="20">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="Auto" />
+
+                        <RowDefinition Height="*" />
+
+                        <RowDefinition Height="Auto" />
+
+                    </Grid.RowDefinitions>
+
+
+
+                    <TextBlock Grid.Row="0"
+
+                               Text="Settings"
+
+                               FontSize="20"
+
+                               FontWeight="SemiBold"
+
+                               Margin="0,0,0,20" />
+
+
+
+                    <StackPanel Grid.Row="1">
+
+                        <TextBlock Text="Appearance"
+
+                                   FontWeight="SemiBold"
+
+                                   Margin="0,0,0,8" />
+
+                        <RadioButton Content="Light mode"
+
+                                     IsChecked="{Binding IsLightThemeSelected}"
+
+                                     Margin="0,0,0,8" />
+
+                        <RadioButton Content="Dark mode"
+
+                                     IsChecked="{Binding IsDarkThemeSelected}"
+
+                                     Margin="0,0,0,16" />
+
+                    </StackPanel>
+
+
+
+                    <StackPanel Grid.Row="3"
+
+                                Orientation="Horizontal"
+
+                                HorizontalAlignment="Right">
+
+                        <Button Content="Apply"
+
+                                Command="{Binding ApplySettingsCommand}"
+
+                                MinWidth="88"
+
+                                Margin="0,0,8,0" />
+
+                        <Button Content="Close"
+
+                                Command="{Binding CloseSettingsCommand}"
+
+                                MinWidth="88" />
+
+                    </StackPanel>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</Window>
+
+
