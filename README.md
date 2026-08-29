@@ -195,4 +195,4 @@ Current version: **1.0.0**
 
 ## License
 
-See repository license terms. If no license file is present, all rights reserved by the repository owner.
+This project is licensed under the [MIT License](LICENSE).
