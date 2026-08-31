@@ -88,6 +88,8 @@ dotnet publish src/ResumableCopy.App/ResumableCopy.App.csproj `
 
 See [installer/README.md](installer/README.md) for Inno Setup installer instructions.
 
+**Windows installer (recommended):** [Graphosec-Setup-1.0.0.exe](https://github.com/Poojana-Fernando/Graphosec-Copy-Engine/releases/latest) — self-contained, no separate .NET install required.
+
 ## Using Graphosec
 
 1. **Start a transfer** — choose source file and destination path (or click a ready drive), then click **Start**.
