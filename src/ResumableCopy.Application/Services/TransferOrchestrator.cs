@@ -48,6 +48,8 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
 
     private readonly ITransferHistoryStore _historyStore;
 
+    private readonly IDestinationRegistry _destinationRegistry;
+
     private readonly ILogger<TransferOrchestrator> _logger;
 
     private readonly TimeSpan _progressInterval;
@@ -80,7 +82,9 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
 
         IOptions<ResumableCopySettings>? settings = null,
 
-        ITransferHistoryStore? historyStore = null)
+        ITransferHistoryStore? historyStore = null,
+
+        IDestinationRegistry? destinationRegistry = null)
 
     {
 
@@ -99,6 +103,8 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         _historyStore = historyStore ?? new NullTransferHistoryStore();
+
+        _destinationRegistry = destinationRegistry ?? new NullDestinationRegistry();
 
         var intervalMs = settings?.Value.Diagnostics.ProgressUpdateIntervalMilliseconds ?? 0;
 
@@ -182,7 +188,17 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
 
 
 
+        await _destinationRegistry
+
+            .RegisterAsync(destinationPath, cancellationToken)
+
+            .ConfigureAwait(false);
+
+
+
         Publish(runtime);
+
+        await PersistHistorySafeAsync(runtime.Snapshot).ConfigureAwait(false);
 
         _logger.LogInformation(
 
@@ -290,6 +306,8 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
 
             Publish(runtime);
 
+            await PersistHistorySafeAsync(runtime.Snapshot).ConfigureAwait(false);
+
         }
 
 
@@ -315,6 +333,14 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
 
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+
+
+
+        await _destinationRegistry
+
+            .RegisterAsync(destinationPath, cancellationToken)
+
+            .ConfigureAwait(false);
 
 
 
@@ -447,6 +473,8 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
 
             Publish(runtime);
 
+            await PersistHistorySafeAsync(runtime.Snapshot).ConfigureAwait(false);
+
         }
 
     }
@@ -493,9 +521,17 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
 
         {
 
+            runtime.MarkCancelled("Transfer cancelled.");
+
+            Publish(runtime);
+
+            await PersistHistorySafeAsync(runtime.Snapshot).ConfigureAwait(false);
+
             runtime.RequestCancel();
 
             await WaitForCancelCompletionAsync(runtime, cancellationToken).ConfigureAwait(false);
+
+            await CleanupCancelledSessionAsync(runtime).ConfigureAwait(false);
 
             return;
 
@@ -518,6 +554,8 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
         await CleanupCancelledSessionAsync(runtime).ConfigureAwait(false);
 
         Publish(runtime);
+
+        await PersistHistorySafeAsync(runtime.Snapshot).ConfigureAwait(false);
 
     }
 
@@ -772,6 +810,42 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
             _transfers[record.SessionId] = runtime;
 
             Publish(runtime);
+
+        }
+
+
+
+        var registeredDestinations = await _destinationRegistry
+
+            .GetRegisteredAsync(cancellationToken)
+
+            .ConfigureAwait(false);
+
+
+
+        var destinationPaths = records
+
+            .Select(static record => record.DestinationPath)
+
+            .Concat(registeredDestinations)
+
+            .Where(static path => !string.IsNullOrWhiteSpace(path))
+
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+
+
+
+            .ToArray();
+
+
+
+        foreach (var destinationPath in destinationPaths)
+
+        {
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await DiscoverAndMergeOrphanedSessionsAsync(destinationPath, cancellationToken).ConfigureAwait(false);
 
         }
 
@@ -1141,7 +1215,9 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
 
     private static bool ShouldPersistToHistory(CopyState state) =>
 
-        state is CopyState.Completed
+        state is CopyState.Pending
+
+            or CopyState.Completed
 
             or CopyState.Failed
 
@@ -1156,6 +1232,98 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
             or CopyState.WaitingForStorage
 
             or CopyState.RecoveryRequired;
+
+
+
+    private async Task DiscoverAndMergeOrphanedSessionsAsync(
+
+        string destinationPath,
+
+        CancellationToken cancellationToken)
+
+    {
+
+        IReadOnlyList<RecoverableSessionInfo> recoverable;
+
+        try
+
+        {
+
+            recoverable = await _recoveryService
+
+                .DiscoverRecoverableSessionsAsync(destinationPath, cancellationToken)
+
+                .ConfigureAwait(false);
+
+        }
+
+        catch (DestinationUnavailableException exception)
+
+        {
+
+            _logger.LogDebug(
+
+                exception,
+
+                "Skipping orphaned session discovery for unavailable destination {DestinationPath}",
+
+                destinationPath);
+
+            return;
+
+        }
+
+
+
+        foreach (var session in recoverable)
+
+        {
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+
+
+            if (_transfers.TryGetValue(session.SessionId, out var existing)
+
+                && existing.Snapshot.State is CopyState.Cancelled or CopyState.Completed)
+
+            {
+
+                continue;
+
+            }
+
+
+
+            var runtime = TransferRuntime.FromRecovery(
+
+                session.SourcePath,
+
+                session.DestinationPath,
+
+                session.SessionId,
+
+                session.State,
+
+                session.CompletedBytes,
+
+                session.TotalBytes,
+
+                session.CompletedChunks,
+
+                session.TotalChunks,
+
+                session.LastError);
+
+
+
+            _transfers[session.SessionId] = runtime;
+
+            Publish(runtime);
+
+        }
+
+    }
 
 
 
@@ -1572,10 +1740,6 @@ public sealed class TransferOrchestrator : ITransferOrchestrator
                 _bytesPerSecond = 0;
 
             }
-
-
-
-            _flushProgress?.Invoke();
 
         }
 

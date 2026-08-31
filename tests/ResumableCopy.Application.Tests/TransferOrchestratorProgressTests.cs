@@ -18,9 +18,11 @@ public class CopyProgressGuardTests
     [InlineData(CopyState.WaitingForDestination, CopyState.Running, false)]
     [InlineData(CopyState.Paused, CopyState.Running, true)]
     [InlineData(CopyState.Cancelled, CopyState.Running, false)]
+    [InlineData(CopyState.Cancelled, CopyState.Paused, false)]
+    [InlineData(CopyState.Completed, CopyState.Paused, false)]
     [InlineData(CopyState.Running, CopyState.Paused, false)]
     [InlineData(CopyState.Running, CopyState.Running, true)]
-    [InlineData(CopyState.Failed, CopyState.WaitingForDestination, true)]
+    [InlineData(CopyState.Failed, CopyState.WaitingForDestination, false)]
     [InlineData(CopyState.Running, CopyState.Completed, true)]
     public void ShouldApplyProgress_RespectsTerminalAndWaitingStates(
         CopyState currentState,
@@ -334,6 +336,7 @@ public class TransferOrchestratorCleanupTests
         var copyEngine = new WaitingCopyEngine();
         var cleanup = new NoOpSessionCleanupService();
         string? sessionId = null;
+        TransferSnapshot? latest = null;
 
         using var orchestrator = new TransferOrchestrator(
             copyEngine,
@@ -345,7 +348,11 @@ public class TransferOrchestratorCleanupTests
             NullLogger<TransferOrchestrator>.Instance,
             Options.Create(new ResumableCopySettings()));
 
-        orchestrator.TransferChanged += (_, snapshot) => sessionId ??= snapshot.SessionId;
+        orchestrator.TransferChanged += (_, snapshot) =>
+        {
+            sessionId ??= snapshot.SessionId;
+            latest = snapshot;
+        };
 
         var copyTask = orchestrator.StartCopyAsync(
             @"C:\source.bin",
@@ -358,6 +365,38 @@ public class TransferOrchestratorCleanupTests
         await copyTask;
 
         Assert.Contains(sessionId!, cleanup.CleanedSessionIds);
+        Assert.Equal(CopyState.Cancelled, latest!.State);
+        Assert.Equal("Cancelled", latest.StatusText);
+    }
+
+    [Fact]
+    public async Task StartCopyAsync_WhenCancelled_StalePausedProgressDoesNotRevertState()
+    {
+        using var orchestrator = new TransferOrchestrator(
+            new StalePausedProgressCopyEngine(),
+            new NoOpRecoveryService(),
+            new NoOpSessionCleanupService(),
+            new TestDeviceMonitor(),
+            new TestDriveProvider(),
+            new TestFileSystemService(),
+            NullLogger<TransferOrchestrator>.Instance,
+            Options.Create(new ResumableCopySettings()));
+
+        TransferSnapshot? latest = null;
+        orchestrator.TransferChanged += (_, snapshot) => latest = snapshot;
+
+        var copyTask = orchestrator.StartCopyAsync(
+            @"C:\source.bin",
+            @"D:\dest.bin",
+            new CopyOptions(),
+            CancellationToken.None);
+
+        await WaitUntil(() => latest is not null);
+        await orchestrator.CancelTransferAsync(latest!.SessionId, CancellationToken.None);
+        await copyTask;
+
+        Assert.Equal(CopyState.Cancelled, latest!.State);
+        Assert.Equal("Cancelled", latest.StatusText);
     }
 
     private static async Task WaitUntil(Func<bool> condition, int timeoutMilliseconds = 2000)
@@ -418,5 +457,48 @@ public class TransferOrchestratorCleanupTests
             IProgress<CopyProgress>? progress,
             CancellationToken cancellationToken) =>
             CopyAsync(new CopyJob("source", destinationPath, options ?? new CopyOptions()), progress, cancellationToken);
+    }
+
+    private sealed class StalePausedProgressCopyEngine : ICopyEngine
+    {
+        public async Task<CopyResult> CopyAsync(
+            CopyJob job,
+            IProgress<CopyProgress>? progress,
+            CancellationToken cancellationToken)
+        {
+            progress?.Report(new CopyProgress(
+                job.SessionId ?? "session-1",
+                CopyState.Running,
+                1024,
+                4096,
+                1,
+                4));
+
+            try
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+                throw new InvalidOperationException("Copy did not cancel.");
+            }
+            catch (OperationCanceledException)
+            {
+                progress?.Report(new CopyProgress(
+                    job.SessionId ?? "session-1",
+                    CopyState.Paused,
+                    2048,
+                    4096,
+                    2,
+                    4));
+
+                throw;
+            }
+        }
+
+        public Task<CopyResult> ResumeAsync(
+            string sessionId,
+            string destinationPath,
+            CopyOptions? options,
+            IProgress<CopyProgress>? progress,
+            CancellationToken cancellationToken) =>
+            CopyAsync(new CopyJob("source", destinationPath, options ?? new CopyOptions(), sessionId), progress, cancellationToken);
     }
 }

@@ -11,6 +11,8 @@ internal sealed class NoOpRecoveryService : ITransferRecoveryService
 
     public Func<string, Exception?>? DiscoverExceptionFactory { get; init; }
 
+    public Func<string, IReadOnlyList<RecoverableSessionInfo>>? DiscoverHandler { get; init; }
+
     public ValueTask<IReadOnlyList<RecoverableSessionInfo>> DiscoverRecoverableSessionsAsync(
         string destinationPath,
         CancellationToken cancellationToken)
@@ -20,7 +22,8 @@ internal sealed class NoOpRecoveryService : ITransferRecoveryService
             throw exception;
         }
 
-        return ValueTask.FromResult<IReadOnlyList<RecoverableSessionInfo>>([]);
+        return ValueTask.FromResult(
+            DiscoverHandler?.Invoke(destinationPath) ?? Array.Empty<RecoverableSessionInfo>());
     }
 
     public ValueTask<RecoveryResult> RecoverSessionAsync(

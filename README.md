@@ -38,7 +38,7 @@ Graphosec is a Windows desktop application for reliable, integrity-verified, res
 ## Requirements
 
 - **OS:** Windows 10 or later (x64)
-- **Runtime:** [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download) (for published builds)
+- **Installer:** Self-contained — no separate .NET runtime install required
 - **Development:** [.NET 10 SDK](https://dotnet.microsoft.com/download)
 
 ## Quick start
@@ -80,8 +80,9 @@ If NuGet vulnerability audit fails offline, publish with:
 
 ```powershell
 dotnet publish src/ResumableCopy.App/ResumableCopy.App.csproj `
-  -c Release -r win-x64 --self-contained false `
+  -c Release -r win-x64 --self-contained true `
   -o artifacts/publish/Graphosec `
+  /p:PublishSingleFile=false `
   /p:NuGetAudit=false
 ```
 

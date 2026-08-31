@@ -6,6 +6,11 @@ internal static class CopyProgressGuard
 {
     public static bool ShouldApplyProgress(CopyState currentState, CopyState incomingState)
     {
+        if (currentState is CopyState.Cancelled or CopyState.Completed or CopyState.Failed)
+        {
+            return false;
+        }
+
         if (incomingState is CopyState.Running or CopyState.Verifying
             && currentState is CopyState.Paused)
         {

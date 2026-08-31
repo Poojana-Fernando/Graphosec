@@ -50,6 +50,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<IPathAnalysisService, PathAnalysisService>();
         services.AddSingleton<IDriveEnumerationService, DriveEnumerationService>();
         services.AddSingleton<ITransferHistoryStore, JsonTransferHistoryStore>();
+        services.AddSingleton<IDestinationRegistry, JsonDestinationRegistry>();
         services.AddSingleton<IVolumeChangeMonitor, NullVolumeChangeMonitor>();
         services.AddSingleton<ITransferOrchestrator, TransferOrchestrator>();
         services.AddSingleton<MainViewModel>();
