@@ -76,19 +76,21 @@ Published files:
 artifacts/publish/Graphosec/Graphosec.exe
 ```
 
-If NuGet vulnerability audit fails offline, publish with:
+### Windows installer (GitHub Release)
+
+Download the latest self-contained setup (no separate .NET install):
+
+**[Graphosec-Setup-1.0.0.exe](https://github.com/Poojana-Fernando/Graphosec/releases/latest)**
+
+Build and publish a release locally:
 
 ```powershell
-dotnet publish src/ResumableCopy.App/ResumableCopy.App.csproj `
-  -c Release -r win-x64 --self-contained true `
-  -o artifacts/publish/Graphosec `
-  /p:PublishSingleFile=false `
-  /p:NuGetAudit=false
+.\installer\prepare-release.ps1
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
-See [installer/README.md](installer/README.md) for Inno Setup installer instructions.
-
-**Windows installer (recommended):** [Graphosec-Setup-1.0.0.exe](https://github.com/Poojana-Fernando/Graphosec-Copy-Engine/releases/latest) — self-contained, no separate .NET install required.
+Pushing a `v*` tag triggers `.github/workflows/release.yml`, which builds the installer and attaches it to GitHub Releases.
 
 ## Using Graphosec
 
